@@ -236,19 +236,23 @@ class UnifiedCacheManager:
             data = await self._backend.load_data()
             
             if data:
+                # 修复：合并而不是覆盖，以保留尚未写入的内存中更改
+                # 以文件中的数据为基础，然后用当前内存中的缓存覆盖它
+                # 这样可以保留脏数据，同时更新未更改的条目
+                current_mem_cache = self._cache.copy()
                 self._cache = data
-                log.debug(f"{self._name} cache loaded ({len(self._cache)}) from backend")
+                self._cache.update(current_mem_cache)
+                log.debug(f"{self._name} cache merged ({len(self._cache)}) from backend")
             else:
-                # 如果后端没有数据，初始化空缓存
-                self._cache = {}
-                log.debug(f"{self._name} cache initialized empty")
-            
+                # 如果后端没有数据，则保持现有缓存不变（可能包含脏数据）
+                log.debug(f"{self._name} cache initialized empty or backend is empty, keeping in-memory cache.")
+
             operation_time = time.time() - start_time
             log.debug(f"{self._name} cache loaded in {operation_time:.3f}s")
-            
+
         except Exception as e:
             log.error(f"Error loading {self._name} cache from backend: {e}")
-            self._cache = {}
+            # 出错时不应清空缓存，应保留内存中的数据
     
     async def _write_loop(self):
         """异步写回循环"""
