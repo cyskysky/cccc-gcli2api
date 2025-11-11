@@ -1,0 +1,76 @@
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+  name: GCLI2API
+  description: 一个开源的高性能API代理服务，它使得Google Gemini模型能够兼容OpenAI的API格式。
+  icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/gemini.svg
+  tags:
+    - AI
+    - Proxy
+    - Gemini
+    - OpenAI
+spec:
+  variables:
+    - key: PUBLIC_DOMAIN
+      type: DOMAIN
+      name: 公共域名
+      description: 您希望为GCLI2API服务绑定的域名。
+    - key: API_PASSWORD
+      type: PASSWORD
+      name: API 密码
+      description: 用于保护OpenAI/Gemini API端点的密码。
+    - key: PANEL_PASSWORD
+      type: PASSWORD
+      name: 控制面板密码
+      description: 用于保护Web控制面板的密码。
+  readme: |-
+    # GCLI2API
+    GCLI2API是一个开源的高性能API代理服务，它使得Google Gemini模型能够兼容OpenAI的API格式。
+
+    它允许您在任何支持OpenAI API的客户端应用程序中使用Gemini模型，并提供了凭证轮换、自动重试和Web控制面板等功能。
+  services:
+    - name: gcli2api
+      icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/gemini.svg
+      template: PREBUILT
+      domainKey: PUBLIC_DOMAIN
+      spec:
+        source:
+          image: ghcr.io/cyskysky/cccc-gcli2api:latest
+        ports:
+          - id: web
+            port: 7861
+            type: HTTP
+        volumes:
+          - id: creds-data
+            dir: /app/creds
+        env:
+          API_PASSWORD:
+            default: ${API_PASSWORD}
+            expose: true
+          PANEL_PASSWORD:
+            default: ${PANEL_PASSWORD}
+            expose: true
+          CREDENTIALS_DIR:
+            default: /app/creds
+            readonly: true
+localization:
+  en-US:
+    description: An open-source, high-performance API proxy that makes Google Gemini models compatible with the OpenAI API format.
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: Public Domain
+        description: The domain you want to bind to your GCLI2API service.
+      - key: API_PASSWORD
+        type: PASSWORD
+        name: API Password
+        description: Password to protect the OpenAI/Gemini API endpoints.
+      - key: PANEL_PASSWORD
+        type: PASSWORD
+        name: Control Panel Password
+        description: Password to protect the web control panel.
+    readme: |-
+      # GCLI2API
+      GCLI2API is an open-source, high-performance API proxy that makes Google Gemini models compatible with the OpenAI API format.
+
+      It allows you to use Gemini models with any client application that supports the OpenAI API, providing features like credential rotation, automatic retries, and a web control panel.
